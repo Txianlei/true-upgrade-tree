@@ -16,23 +16,30 @@ addLayer("b", {
         exp = new ExpantaNum(0.25)
         if (hasUpgrade("b",42)) exp = exp.add(0.05)
         if (hasUpgrade("p",12)) exp = exp.add(0.03)
+
+        if(inChallenge("p",21)) exp = new ExpantaNum(0.01)
         return exp
     }, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new ExpantaNum(1)
+        if (inChallenge("p",11)) mult = mult.div(1e50)
+
         if (hasUpgrade("b",12)) mult = mult.times(2)
-        if (hasMilestone("p",0)) mult = mult.times(2)
-        if (hasUpgrade("b",14)&&!(inChallenge("b",22)||inChallenge("b",31))) mult = mult.times(upgradeEffect("b",14))
+        if (hasUpgrade("b",14)&&!(inChallenge("b",22)||inChallenge("b",31)||inChallenge("b",41))) mult = mult.times(upgradeEffect("b",14))
         if (hasUpgrade("b",22)) mult = mult.times(upgradeEffect("b",22))
         if (hasUpgrade("b",41)) mult = mult.times(buyableEffect("b",11).pow(0.3))
-        if (getBuyableAmount("b",12).gte(1)) mult = mult.times(buyableEffect("b",12))
+        if (getBuyableAmount("b",12).gte(1) && !inChallenge("p",11)) mult = mult.times(buyableEffect("b",12))
         if (hasUpgrade("p",11)) mult = mult.times(2)
         if (hasUpgrade("p",14)) mult = mult.times(15)
+        if (hasUpgrade("b",61)) mult = mult.times((tmp.p.effect).pow(0.345))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         pow = new ExpantaNum(1)
-        if (hasUpgrade("b",32)) pow = pow.times(1.5)
+        if (hasUpgrade("b",32)&&!inChallenge("b",41)) pow = pow.times(1.5)
+        if (hasUpgrade("b",55)) pow = pow.times(1.1)
+        if (hasUpgrade("b",65)) pow = pow.times(upgradeEffect("b",65))
+        if (inChallenge("p",22)) pow = pow.times(0.5)
         return pow
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
@@ -75,7 +82,7 @@ addLayer("b", {
         13:{
             title:"#2",
             description:"Boost point gain based on basics.",
-            effect:()=>player.b.points.add(1).pow(0.35).pow(hasUpgrade("b",23) ? 1.2 : 1).floor().min(new ExpantaNum("1e3000")),
+            effect:()=>player.b.points.add(1).pow(0.35).pow(hasUpgrade("p",33)? 1.44 : hasUpgrade("b",23) ? 1.2 : 1).floor().min(new ExpantaNum("1e3000")),
             cost:()=>new ExpantaNum(6),
             effectDisplay:()=>{return `x${upgradeEffect("b",13)}`},
             unlocked() {
@@ -85,7 +92,7 @@ addLayer("b", {
         14:{
             title:"#3",
             description:"Boost basic gain based on points.",
-            effect:()=>player.points.add(1).pow(0.4).pow(0.6).pow(hasUpgrade("b",24) ? 1.2 : 1).floor().min(new ExpantaNum("1e3000")),
+            effect:()=>player.points.add(1).pow(0.4).pow(0.6).pow(hasUpgrade("p",34)? 1.44 : hasUpgrade("b",24) ? 1.2 : 1).floor().min(new ExpantaNum("1e3000")),
             cost:()=>new ExpantaNum(25),
             effectDisplay:()=>{return `x${upgradeEffect("b",14)}`},
             unlocked() {
@@ -208,16 +215,8 @@ addLayer("b", {
                 return hasUpgrade("b",42)
             }
         },
-        43:{
-            title:"#18",
-            description:"Unlock a basic challenge.",
-            cost:()=>new ExpantaNum("1e140"),
-            unlocked() {
-                return hasUpgrade("b",42)
-            }
-        },
         44:{
-            title:"#19",
+            title:"#18",
             description:"Point upgrade #5's formula is better.",
             cost:()=>new ExpantaNum("1e143"),
             unlocked() {
@@ -225,7 +224,7 @@ addLayer("b", {
             }
         },
         45:{
-            title:"#20",
+            title:"#19",
             description:"Point upgrade #6's formula is better. Unlock prestige!",
             cost:()=>new ExpantaNum("1e144"),
             unlocked() {
@@ -233,7 +232,7 @@ addLayer("b", {
             }
         },
         51:{
-            title:"#21",
+            title:"#20",
             description:"Gain x4 points.",
             cost:()=>new ExpantaNum("1e150"),
             unlocked() {
@@ -241,11 +240,79 @@ addLayer("b", {
             }
         },
         52:{
-            title:"#22",
+            title:"#21",
             description:"Gain x4 basics.",
             cost:()=>new ExpantaNum("1e155"),
             unlocked() {
                 return hasUpgrade("b",51)
+            }
+        },
+        53:{
+            title:"#22",
+            description:"\"basic boost I\" also affects point gain with a reduced effect.",
+            cost:()=>new ExpantaNum("1e260"),
+            unlocked() {
+                return hasChallenge("p",11)
+            }
+        },
+        54:{
+            title:"#23",
+            description:"Add 0.05 to prestige boost exp.",
+            cost:()=>new ExpantaNum("1e275"),
+            unlocked() {
+                return hasUpgrade("b",53)
+            }
+        },
+        55:{
+            title:"#24",
+            description:"Basic gain is raised to ^1.1,Unlock a prestige upgrade.",
+            cost:()=>new ExpantaNum("1e285"),
+            unlocked() {
+                return hasUpgrade("b",54)
+            }
+        },
+        61:{
+            title:"#25",
+            description:"Prestige also affects basic gain with a reduced effect.",
+            cost:()=>new ExpantaNum("1e6130"),
+            unlocked() {
+                return hasUpgrade("p",44)
+            }
+        },
+        62:{
+            title:"#26",
+            description:"Point gain is raised to ^1.15",
+            cost:()=>new ExpantaNum("1e6333"),
+            unlocked() {
+                return hasUpgrade("b",61)
+            }
+        },
+        63:{
+            title:"#27",
+            description:"Increase the purchase limit of \"basic boost I\" by 10.",
+            cost:()=>new ExpantaNum("1e7300"),
+            unlocked() {
+                return hasUpgrade("b",62)
+            }
+        },
+        64:{
+            title:"#28",
+            description:"A point gain power based on your basic.(You can only choose one between this and Basic upgrade #29!)And Unlock a basic challenge.",
+            cost:()=>new ExpantaNum("1e7340"),
+            effect(){return player.points.add(1).log10().add(1).log10().add(1).ln().div(100).add(1).min(1.169)},
+            effectDisplay() {return `^${upgradeEffect("b",64)}`},
+            unlocked() {
+                return hasUpgrade("b",63) && (!hasUpgrade("b",65) || hasChallenge("p",22) || hasUpgrade("b",64))
+            }
+        },
+        65:{
+            title:"#29",
+            description:"A basic gain power based on your points.(You can only choose one between this and Basic upgrade #28!)And Unlock a prestige challenge.",
+            cost:()=>new ExpantaNum("1e7340"),
+            effect(){return player.points.add(1).log10().add(1).log10().add(1).log10().div(100).add(1).min(1.142)},
+            effectDisplay() {return `^${upgradeEffect("b",65)}`},
+            unlocked() {
+                return hasUpgrade("b",63) && (!hasUpgrade("b",64) || hasChallenge("p",21) || hasUpgrade("b",65))
             }
         },
     },
@@ -284,7 +351,7 @@ addLayer("b", {
         },
         22:{
             name:"Upgradeless I",
-            challengeDescription:"Point upgrade #2, #3 are useless.",
+            challengeDescription:"Basic upgrade #2, #3 are useless.",
             goalDescription:`${new ExpantaNum(1e50)} points.`,
             canComplete:()=>player.points.gte(1e50),
             rewardDescription:"Unlock a basic buyable and a basic challenge.",
@@ -312,6 +379,26 @@ addLayer("b", {
                 return hasUpgrade("p",15)
             }
         },
+        41:{
+            name:"Upgradeless II",
+            challengeDescription:"Basic upgrade #2, #3, #10, #11 are useless.",
+            goalDescription:`${new ExpantaNum("1e394")} points.`,
+            canComplete:()=>player.points.gte(new ExpantaNum("1e394")),
+            rewardDescription:"Unlock a prestige upgrade.",
+            unlocked() {
+                return hasChallenge("p",12)
+            }
+        },
+        42:{
+            name:"Pointless VI",
+            challengeDescription:"All point multipliers are disabled except multipliers from challenges.",
+            goalDescription:`${new ExpantaNum("1000")} points.`,
+            canComplete:()=>player.points.gte(new ExpantaNum("1000")),
+            rewardDescription:"Unlock a prestige challenge.",
+            unlocked() {
+                return hasUpgrade("b",64)
+            }
+        },
     },
     buyables:{
         11:{
@@ -328,7 +415,11 @@ addLayer("b", {
                 return hasChallenge("b",21)
             },
             effect(x) { return new ExpantaNum(10).pow(x).pow(1+x/10).pow(1+x/20)},
-            purchaseLimit:10
+            purchaseLimit() {
+                limit = 10
+                if (hasUpgrade("p",31)) limit = limit + 5
+                return limit
+            }
         },
         12:{
             title:"Basic boost I",
@@ -344,7 +435,12 @@ addLayer("b", {
                 return hasChallenge("b",22)
             },
             effect(x) { return new ExpantaNum(3).pow(x).pow(1+x/50).pow(1+x/100)},
-            purchaseLimit:10
+            purchaseLimit() {
+                limit = 10
+                if (hasUpgrade("p",32)) limit = limit + 5
+                if (hasUpgrade("b",63)) limit = limit + 10
+                return limit
+            }
         }
     }
 }),
@@ -377,10 +473,12 @@ addLayer("p", {
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         pow = new ExpantaNum(1)
+        if (hasUpgrade("p",43)) pow = pow.times(1.15)
         return pow
     },
     effectBase() {
         let base = new ExpantaNum(0.8);
+        if (hasUpgrade("b",54)) base = base.add(0.05)
         return base.pow(tmp.p.power);
     },
     power() {
@@ -474,7 +572,7 @@ addLayer("p", {
         22:{
             title:"Prestige #6",
             description:"Gain more prestige points based on your points.",
-            effect() {return player.points.add(1).log10().add(1).ln().add(1).min(new ExpantaNum("1e3000"))},
+            effect() {return hasUpgrade("p",41) ? player.points.add(1).log10().pow(0.3).add(1).min(new ExpantaNum("1e3000")) : player.points.add(1).log10().add(1).ln().add(1).min(new ExpantaNum("1e3000"))},
             cost:new ExpantaNum(5e6),
             effectDisplay:()=>{return `x${upgradeEffect("p",22)}`},
             unlocked() {
@@ -484,7 +582,7 @@ addLayer("p", {
         23:{
             title:"Prestige #7",
             description:"Gain more prestige points based on your basics.",
-            effect() {return player.points.add(1).ln().add(1).ln().add(1).min(new ExpantaNum("1e3000"))},
+            effect() {return hasUpgrade("p",42) ? player.b.points.add(1).ln().add(1).min(new ExpantaNum("1e3000")) : player.b.points.add(1).ln().add(1).ln().add(1).min(new ExpantaNum("1e3000"))},
             effectDisplay:()=>{return `x${upgradeEffect("p",23)}`},
             cost:new ExpantaNum(1e8),
             unlocked() {
@@ -502,9 +600,133 @@ addLayer("p", {
         25:{
             title:"Prestige #9",
             description:"Unlock a prestige challenge.",
-            cost:new ExpantaNum(1e11),
+            cost:new ExpantaNum(1e10),
             unlocked() {
                 return hasUpgrade("b",21)
+            }
+        },
+        31:{
+            title:"Prestige #10",
+            description:"Increase the purchase limit of \"point boost I\" by 5.",
+            cost:new ExpantaNum(1e18),
+            unlocked() {
+                return hasUpgrade("b",55)
+            }
+        },
+        32:{
+            title:"Prestige #11",
+            description:"Increase the purchase limit of \"basic boost I\" by 5.",
+            cost:new ExpantaNum(1e38),
+            unlocked() {
+                return hasUpgrade("p",31)
+            }
+        },
+        33:{
+            title:"Prestige #12",
+            description:"Basic upgrade #2 is raised to ^1.2(Which needs BU #7)",
+            cost:new ExpantaNum(1e41),
+            unlocked() {
+                return hasUpgrade("p",32) && hasUpgrade("b",23)
+            }
+        },
+        34:{
+            title:"Prestige #13",
+            description:"Basic upgrade #3 is raised to ^1.2(Which needs BU #8)",
+            cost:new ExpantaNum(1e90),
+            unlocked() {
+                return hasUpgrade("p",33) && hasUpgrade("b",24)
+            }
+        },
+        35:{
+            title:"Prestige #14",
+            description:"Unlock a prestige challenge.",
+            cost:new ExpantaNum("1e358"),
+            unlocked() {
+                return hasUpgrade("p",34)
+            }
+        },
+        41:{
+            title:"Prestige #15",
+            description:"Prestige upgrade #6's formula is better.",
+            cost:new ExpantaNum("1e358"),
+            unlocked() {
+                return hasChallenge("b",41)
+            }
+        },
+        42:{
+            title:"Prestige #16",
+            description:"Prestige upgrade #7's formula is better.",
+            cost:new ExpantaNum("1e359"),
+            unlocked() {
+                return hasUpgrade("p",41)
+            }
+        },
+        43:{
+            title:"Prestige #17",
+            description:"Prestige point gain is raised to ^1.15",
+            cost:new ExpantaNum("1e362"),
+            unlocked() {
+                return hasUpgrade("p",42)
+            }
+        },
+        44:{
+            title:"Prestige #18",
+            description:"Unlock a basic upgrade.",
+            cost:new ExpantaNum("1e420"),
+            unlocked() {
+                return hasUpgrade("p",43)
+            }
+        },
+        45:{
+            title:"Prestige #19",
+            description:"Unlock time warp!(COMING SOON......)",
+            cost:new ExpantaNum("e9e15"),
+            unlocked() {
+                return hasChallenge("p",21) && hasChallenge("p",22)
+            }
+        },
+    },
+    challenges:{
+        row:10,
+        column:2,
+        11:{
+            name:"Basicless I",
+            challengeDescription:"Basic gain is divided by 1e50, \"Basic boost I\" is disabled.",
+            goalDescription:`${new ExpantaNum(1e25)} basics.`,
+            canComplete:()=>player.b.points.gte(1e25),
+            rewardDescription:"Unlock a basic upgrade.",
+            unlocked() {
+                return hasUpgrade("p",25)
+            }
+        },
+        12:{
+            name:"Pointless V",
+            challengeDescription:"\"Point boost I\" is disabled. Point gain is raised to ^0.0375",
+            goalDescription:`${new ExpantaNum("1e415")} basics.`,
+            canComplete:()=>player.b.points.gte(new ExpantaNum("1e415")),
+            rewardDescription:"Unlock a basic challenge.",
+            unlocked() {
+                return hasUpgrade("p",35)
+            }
+        },
+        21:{
+            name:"Basicless II",
+            challengeDescription:"Basic gain base is always 0.01",
+            goalDescription:`${new ExpantaNum("1e1570")} basics.`,
+            canComplete:()=>player.b.points.gte("1e1570"),
+            rewardDescription:"You can buy another basic upgrade now.",
+            unlocked() {
+                return hasChallenge("b",42)
+            }
+        },
+        22:{
+            name:"Basicless III",
+            challengeDescription:"Basic gain is raised to ^0.5",
+            goalDescription:`${new ExpantaNum("1e1070")} basics.`,
+            canComplete:()=>player.b.points.gte("1e1070"),
+            rewardDescription:"You can buy another basic upgrade now.",
+            unlocked() {
+                return hasUpgrade("b",65)
             }
         },
     }

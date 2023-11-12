@@ -1,8 +1,8 @@
 let modInfo = {
-	name: "The Modding Tree",
+	name: "The normal tree",
 	id: "mymod",
-	author: "",
-	pointsName: "points",
+	author: "User incremental",
+	pointsName: "point",
 	discordName: "",
 	discordLink: "",
 	initialStartPoints: new ExpantaNum (0), // Used for hard resets and new players
@@ -12,16 +12,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0",
-	name: "",
+	num: "1.0",
+	name: "True release",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.0</h3><br>
-		- Added things.<br>
-		- Added stuff.`
+	<h3>v1.0</h3><br>
+		- Added basic.<br>
+		- Added prestige.`
 
-let winText = `Congratulations! You have reached the end and beaten this game, but for now...`
+let winText = `So...Why do you play this rubbish for so long?`
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
@@ -46,20 +46,27 @@ function getPointGen() {
 	if (hasChallenge("b",11)) gain = gain.times(2)
 	if (inChallenge("b",12)||inChallenge("b",31)) gain = gain.div(666)
 	if (hasChallenge("b",12)) gain = gain.times(3)
+	
+	if (!inChallenge("b",42)) {
+		if (hasUpgrade("b",11)) gain = gain.times(2)
+		if (hasUpgrade("b",51)) gain = gain.times(4)	
+		if (hasUpgrade("b",13)&&!(inChallenge("b",22)||inChallenge("b",31)||inChallenge("b",41))) gain = gain.times(upgradeEffect("b",13))
+		if (hasUpgrade("b",21)) gain = gain.times(upgradeEffect("b",21))
+		if (getBuyableAmount("b",11).gte(1) && !inChallenge("p",12)) gain = gain.times(buyableEffect("b",11))
+		if (hasUpgrade("p",11)) gain = gain.times(2)
+		if (hasUpgrade("p",14)) gain = gain.times(20)
+		if (hasUpgrade("b",53)) gain = gain.times(buyableEffect("b",12).pow(0.7))
+	}
 
-	if (hasUpgrade("b",11)) gain = gain.times(2)
-	if (hasUpgrade("b",51)) gain = gain.times(4)	
-	if (hasUpgrade("b",13)&&!(inChallenge("b",22)||inChallenge("b",31))) gain = gain.times(upgradeEffect("b",13))
-	if (hasUpgrade("b",21)) gain = gain.times(upgradeEffect("b",21))
-	if (getBuyableAmount("b",11).gte(1)) gain = gain.times(buyableEffect("b",11))
-	if (hasUpgrade("p",11)) gain = gain.times(2)
-	if (hasUpgrade("p",14)) gain = gain.times(20)
-
-	if (hasUpgrade("b",31)) gain = gain.pow(1.5)
+	if (hasUpgrade("b",31)&&!inChallenge("b",41)) gain = gain.pow(1.5)
 	if (hasUpgrade("p",11)) gain = gain.pow(1.1)
+	if (hasUpgrade("b",62)) gain = gain.pow(1.15)
+	if (hasUpgrade("b",64)) gain = gain.pow(upgradeEffect("b",64))
 	if (inChallenge("b",21)||inChallenge("b",31)) gain = gain.pow(0.3)
 	if (inChallenge("b",32)) gain = gain.pow(0.111)
-	if (player.p.unlocked) gain = gain.times(tmp.p.effect)
+ 	if (inChallenge("b",32)) gain = gain.pow(0.111)
+	if (inChallenge("p",12)) gain = gain.pow(0.0375)
+	if (player.p.unlocked&&!inChallenge("b",42)) gain = gain.times(tmp.p.effect)
 	return gain
 }
 
